@@ -1,26 +1,26 @@
 
 import paho.mqtt.client as mqtt
 
-MQTT_ADDRESS = '192.168.0.48'
-MQTT_PORT = 1883
-
-MQTT_ID = 'FritzScraper'
-
-BASE_TOPIC = 'fritzscraper/fritz_1'
-
 class MqttConnection(object):
-
   _client = None
-  _address = MQTT_ADDRESS
-  _port = MQTT_PORT
+  _address = ''
+  _port = 0
+  _user = ''
+  _pw = ''
+  _id = ''
+  _base_topic = ''
   _connected = False
 
-  def __init__(self, address=MQTT_ADDRESS, port=MQTT_PORT):
+  def __init__(self, address, port, user, pw, id, base_topic):
     self._address = address
     self._port = port
+    self._user = user
+    self._pw = pw
+    self._id = id
+    self._base_topic = base_topic
     self._connected = False
 
-    self._client = mqtt.Client(MQTT_ID)
+    self._client = mqtt.Client(self._id)
     self._client.on_connect = self.on_connect
     self._client.on_disconnect = self.on_disconnect
 
@@ -49,7 +49,7 @@ class MqttConnection(object):
     if not self._connected:
       print("Connecting to MQTT Broker.")
       try:
-        self._client.username_pw_set("emoncms", "FNnB6Qnr6Mgt7h2hYROA")
+        self._client.username_pw_set(self._user, self._pw)
         self._client.connect(self._address, self._port, 60)
       except:
         print("Error connecting...")
@@ -63,7 +63,7 @@ class MqttConnection(object):
       for name, value in fscargo.cargo.items():
 
         # Construct topic
-        topic = BASE_TOPIC + '/' + str(name)
+        topic = self._base_topic + '/' + str(name)
         payload = str(value)
 
         print("Publishing: " + topic + " " + payload)

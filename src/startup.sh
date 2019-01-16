@@ -13,7 +13,7 @@ sigterm_handler() {
 
 trap 'kill ${!}; sigterm_handler' SIGTERM
 
-#pip install -r requirements.txt --upgrade
+pip install -r requirements.txt --upgrade
 
 python fritzscraper.py &
 pid="$!"

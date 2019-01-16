@@ -1,20 +1,21 @@
-
 import scraper as fs
 import mqttconnection as mqtt
 import signal
 import sys
 import time
-
-INTERVAL = 5.0
+import os
 
 class FritzScraper(object):
+  _exit = False
+  _interval = 0.0
 
   def __init__(self):
     self._exit = False
+    self._interval = os.environ['SCRAPE_INTERVAL']
     signal.signal(signal.SIGTERM, self._sigterm_handler)
 
-    self._scraper = fs.Scraper()
-    self._mqttConnection = mqtt.MqttConnection()
+    self._scraper = fs.Scraper(os.environ['FRITZ_IP_ADDRESS'], os.environ['FRITZ_TCP_PORT'])
+    self._mqttConnection = mqtt.MqttConnection(os.environ['MQTT_ADDRESS'], os.environ['MQTT_PORT'], os.environ['MQTT_ID'], os.environ['MQTT_BASE_TOPIC'], os.environ['MQTT_USER'], os.environ['MQTT_PASSWORD'])
 
   def _sigterm_handler(self, signal, frame):
     print("SIGTERM received")
@@ -26,9 +27,9 @@ class FritzScraper(object):
       fscargo = self._scraper.get_cargo()
       self._mqttConnection.publish(fscargo)
 
-      print("Sleep for " + str(INTERVAL) + "s")
+      print("Sleep for " + str(_interval) + "s")
       sys.stdout.flush()
-      time.sleep(INTERVAL)
+      time.sleep(_interval)
 
   def close(self):
     print("Cleaning up...")
